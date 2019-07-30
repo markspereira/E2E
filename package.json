@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/sigp/E2E#readme",
   "dependencies": {
+    "@babel/runtime": "7.0.0-beta.55",
     "@material-ui/core": "1.2.1",
     "@material-ui/icons": "1.1.0",
     "@types/googlemaps": "3.30.9",
@@ -33,6 +34,7 @@
     "eccrypto": "^1.0.3",
     "ecies-parity": "^0.1.0",
     "ethereum-ens": "^0.7.4",
+    "ethereumjs-tx": "^2.1.0",
     "ethereumjs-util": "^5.2.0",
     "https": "^1.0.0",
     "keccak": "^1.4.0",

@@ -4,18 +4,18 @@ const ecies = require('ecies-parity');
 export const SEND_MSG = 'SEND_MSG';
 export const GET_PUBKEY = "GET_PUBKEY";
 
-/* 
- * Action creators 
+/*
+ * Action creators
  *
  */
 
 export function sendMessage(contractInstance, recipient, pubKey, message, account, encrypt) {
 
-  return async function (dispatch) { 
+  return async function (dispatch) {
 
     // Perform encryption
-    if (encrypt) { 
-      if (pubKey.length != 128) 
+    if (encrypt) {
+      if (pubKey.length != 128)
         dispatch({type: SEND_MSG, status: 'ERROR', value: "Invalid public key"});
       // the API removes the required first byte
       pubKey = "04" + pubKey
@@ -30,10 +30,10 @@ export function sendMessage(contractInstance, recipient, pubKey, message, accoun
     let txHash = ''
     return contractInstance.methods.send(recipient, message).send({from: account})
       .once('transactionHash', (hash) => {
-        txHash = hash; 
+        txHash = hash;
         dispatch({type: SEND_MSG, status: 'HASH', value:{
           hash: hash,
-          message: message, 
+          message: message,
           recipient: recipient}
         })
       })
@@ -48,25 +48,25 @@ export function sendMessage(contractInstance, recipient, pubKey, message, accoun
   }
 }
 
-export function checkForPubKey(recipient) {
-  return function (dispatch) { 
+export function checkForPubKey(web3, recipient) {
+  return function (dispatch) {
 
     dispatch({type: GET_PUBKEY});
 
     // Call the api
-    lookupPubkey(recipient)
+    lookupPubkey(web3, recipient)
       .then( (response) => {
-        if (response.status != 200) {
+        if (!response.publicKey) {
           dispatch({type: GET_PUBKEY, status: 'ERROR'});
           return {}
         }
-        return response.json()
+        return response
       })
-      .then((json) => { 
-        if (json.publickey === undefined) 
+      .then((res) => {
+        if (res.publicKey === undefined)
           dispatch({type: GET_PUBKEY,  status: 'NOTFOUND'});
         else
-          dispatch({type: GET_PUBKEY, status: 'SUCCESS', value: json.publickey})
+          dispatch({type: GET_PUBKEY, status: 'SUCCESS', value: res.publicKey})
       })
   }
 }

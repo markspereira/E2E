@@ -27,7 +27,7 @@ import sendMessageStyle from "assets/jss/layouts/sendMessageStyle.jsx";
 
 class SendMessagePage extends React.Component {
 
-  state = { 
+  state = {
     encrypt: true,
     gasUse: "51000",
     recipient: this.props.currentReply,
@@ -41,7 +41,7 @@ class SendMessagePage extends React.Component {
   };
 
   // update state on-change
-  async handleChange(event, origin) { 
+  async handleChange(event, origin) {
     //TODO: Make this more elegant. Icon to display if public key or not
     //exists.
 
@@ -49,7 +49,7 @@ class SendMessagePage extends React.Component {
 
     // if the address has a '.' in it with at least 3 letters after it, lets check if there is an ens address
     let recipient = this.state.recipient;
-    if (recipient.length - recipient.indexOf('.') > 3 && recipient.indexOf('.') > 0) { 
+    if (recipient.length - recipient.indexOf('.') > 3 && recipient.indexOf('.') > 0) {
       try {
         let ensAddress = await this.props.ens.resolver(recipient).addr()
         await this.setState({recipient: ensAddress})
@@ -63,7 +63,7 @@ class SendMessagePage extends React.Component {
       if (this.state.recipient.length === 40 || (this.state.recipient.length === 42 && this.state.recipient.startsWith('0x'))) {
         // check for correct address
         if (this.props.web3.utils.isAddress(this.state.recipient))  {
-          this.props.checkForPubKey(this.state.recipient);
+          this.props.checkForPubKey(this.props.web3, this.state.recipient);
           return
         }
       }
@@ -75,8 +75,8 @@ class SendMessagePage extends React.Component {
     this.checkGasPrice()
   }
 
-  checkGasPrice() { 
-    const { network, contractInstance, account } = this.props; 
+  checkGasPrice() {
+    const { network, contractInstance, account } = this.props;
 
     if (network === undefined || contractInstance.address === null) {
       this.state.gasUse = "network unavailable"
@@ -88,8 +88,7 @@ class SendMessagePage extends React.Component {
       this.setState({validRecipient: false})
       contractInstance.methods.send(
           "0x1234567890123456789012345678901234567890",
-          this.state.message
-      ).estimateGas({from: account, gas:1e6}, (err, gas) => { 
+      ).estimateGas({from: account, gas:1e6}, (err, gas) => {
         if (gas == 1e6){
           this.setState({gasUse:'revert'});
         }
@@ -107,7 +106,7 @@ class SendMessagePage extends React.Component {
       contractInstance.methods.send(
           recipient,
           this.state.message
-      ).estimateGas({from: account, gas:1e6}, (err, gas) => { 
+      ).estimateGas({from: account, gas:1e6}, (err, gas) => {
         if (gas == 1e6){
           this.setState({gasUse:'revert'});
         }
@@ -118,8 +117,8 @@ class SendMessagePage extends React.Component {
   }
 
   // creates the sendMessage action
-  sendMessage() { 
-    const { network, contractInstance, account, recipientPubKey } = this.props; 
+  sendMessage() {
+    const { network, contractInstance, account, recipientPubKey } = this.props;
     // ensure the recpient address is correct
     if(!this.props.web3.utils.isAddress(this.state.recipient)) {
       this.setState({invalidAddressAlert: true})
@@ -132,13 +131,13 @@ class SendMessagePage extends React.Component {
       return
     }
 
-    if (this.state.encrypt && recipientPubKey === undefined) { 
+    if (this.state.encrypt && recipientPubKey === undefined) {
       this.setState({pubkeyAlert: true})
       return;
     }
 
     let recipient = this.state.recipient;
-    let message = this.state.message; 
+    let message = this.state.message;
     this.props.sendMessage(contractInstance, recipient, recipientPubKey, message, account, this.state.encrypt);
   }
 
@@ -148,7 +147,7 @@ class SendMessagePage extends React.Component {
 
   render() {
     const { classes, currentReply, pubkeyStatus } = this.props;
-    
+
     const smallGC = classNames({
       [classes.gasCounter]: true,
       "sm": true
@@ -180,7 +179,7 @@ class SendMessagePage extends React.Component {
           }
           </section>
           </Hidden>
-          <InputDropdown 
+          <InputDropdown
             options={
               this.props.contacts
             }
@@ -192,16 +191,16 @@ class SendMessagePage extends React.Component {
       {
       //TODO: Fix this loader
       }
-          <FadeLoader 
+          <FadeLoader
           sizeUnit={'px'}
           radius={5}
-          color={'#777'} 
+          color={'#777'}
           loading={pubkeyStatus === 'PENDING'}
           />
-      { pubkeyStatus === 'SUCCESS' && 
+      { pubkeyStatus === 'SUCCESS' &&
         <Tick />
       }
-      { ( pubkeyStatus === 'NOTFOUND' || pubkeyStatus === 'ERROR') && 
+      { ( pubkeyStatus === 'NOTFOUND' || pubkeyStatus === 'ERROR') &&
         <Cross />
       }
       {
@@ -239,7 +238,7 @@ class SendMessagePage extends React.Component {
           </div>
           <div className={classes.actionContainers}>
             <span>Encrypt
-            <Switch 
+            <Switch
               color="primary"
               checked={this.state.encrypt}
               onChange={this.handleEncryptToggleChange}
@@ -260,7 +259,7 @@ class SendMessagePage extends React.Component {
               />
             </div>
             <span>Encrypt
-            <Switch 
+            <Switch
               color="primary"
               checked={this.state.encrypt}
               onChange={this.handleEncryptToggleChange}
@@ -272,24 +271,24 @@ class SendMessagePage extends React.Component {
              />
           </Hidden>
           </section>
-          { 
+          {
             // Alerts
-          } 
-          <SweetAlert 
+          }
+          <SweetAlert
             show={this.state.invalidAddressAlert}
             title="Invalid Address"
             text="The entered recipient address is invalid."
             type="error"
             onConfirm={()=> this.setState({invalidAddressAlert:false})}
         />
-          <SweetAlert 
+          <SweetAlert
             show={this.state.networkUnavailableAlert}
             title="Network Unavailable"
             text="Please connect to a known ethereum network."
             type="error"
             onConfirm={()=> this.setState({networkUnavailableAlert:false})}
         />
-          <SweetAlert 
+          <SweetAlert
             show={this.state.pubkeyAlert}
             title="Public Key Not Found"
             text="The public key of the recipient has not been found. This means the account has not done no prior transactions. Either enter a public key manually via contacts, or consider sending an unencrypted message."

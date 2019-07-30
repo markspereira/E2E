@@ -16,28 +16,28 @@ const mapStateToProps = state => {
     currentReply: state.messages.currentReply,
     recipientPubKey: state.sendMessage.pubkey,
     pubkeyStatus: state.sendMessage.pubkeyStatus
-  } 
-}; 
+  }
+};
 
 const mapDispatchToProps = dispatch => {
   return {
-    sendMessage: (instance, recipient, recipientPubKey, message, account, encrypt) => { 
+    sendMessage: (instance, recipient, recipientPubKey, message, account, encrypt) => {
       dispatch(sendMessage(instance, recipient, recipientPubKey, message, account, encrypt))
     },
     clearReply: () => {
       dispatch({type: 'CLEAR_REPLY'})
     },
-    checkForPubKey: (recipient) => { 
-      dispatch(checkForPubKey(recipient))
+    checkForPubKey: (web3, recipient) => {
+      dispatch(checkForPubKey(web3, recipient))
     },
-    clearPubkeyStatus: () => { 
+    clearPubkeyStatus: () => {
       dispatch({type: 'GET_PUBKEY', status: 'NONE'})
     }
   }
 }
 
 export default connect(
-  mapStateToProps, 
+  mapStateToProps,
   mapDispatchToProps
 )(SendMessagePage)
 
