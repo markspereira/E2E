@@ -10,6 +10,12 @@ export const GET_PUBKEY = "GET_PUBKEY";
  */
 
 export function sendMessage(contractInstance, recipient, pubKey, message, account, encrypt) {
+  console.log('continst: ', contractInstance)
+  console.log('recip: ', recipient)
+  console.log('pubk: ', pubKey)
+  console.log('message: ', message)
+  console.log('account: ', account)
+  console.log('encrypt: ', encrypt)
 
   return async function (dispatch) {
 

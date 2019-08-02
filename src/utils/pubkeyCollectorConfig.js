@@ -25,7 +25,6 @@ let networkList = {
 };
 
 export const lookupPubkey = async (web3, address) => {
-    console.log('WEB3: ', web3.givenProvider.networkVersion);
     let network;
     switch (web3.givenProvider.networkVersion) {
         case "1":
@@ -49,23 +48,27 @@ export const lookupPubkey = async (web3, address) => {
     try {
         const transactions = await fetch(`https://api-${network.name}.etherscan.io/api?module=account&action=txlist&address=${address}&sort=desc&offset=2`);
         const txs = await transactions.json();
-        const latestTx = txs.result[0]
-        const txHash = latestTx.hash;
-        const tx = await web3.eth.getTransaction(txHash);
-        const pubKey = new Transaction({
-            nonce: tx.nonce,
-            gasPrice: `0x${tx.gasPrice.toString(16)}`,
-            gasLimit: tx.gas,
-            to: tx.to,
-            value: `0x${tx.value.toString(16)}`,
-            data: tx.input,
-            r: tx.r,
-            s: tx.s,
-            v: tx.v,
-        },{ chain: network.name }).getSenderPublicKey();
+        if (txs.result.length !== 0) {
+            const latestTx = txs.result[0]
+            const txHash = latestTx.hash;
+            const tx = await web3.eth.getTransaction(txHash);
+            const pubKey = new Transaction({
+                nonce: tx.nonce,
+                gasPrice: `0x${tx.gasPrice.toString(16)}`,
+                gasLimit: tx.gas,
+                to: tx.to,
+                value: `0x${tx.value.toString(16)}`,
+                data: tx.input,
+                r: tx.r,
+                s: tx.s,
+                v: tx.v,
+            },{ chain: network.name }).getSenderPublicKey();
 
-        console.log(pubKey.toString('hex'))
-        return {publicKey: pubKey}
+            console.log(pubKey.toString('hex'))
+            return {publicKey: pubKey.toString('hex')}
+        } else {
+            return {}
+        }
     } catch(e) {
         return e;
     }
